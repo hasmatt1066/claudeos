@@ -1,5 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { IElectronAPI, ChatResponse, StreamChunk } from '../types/electron';
+import type {
+  IElectronAPI,
+  ChatResponse,
+  StreamChunk,
+  ToolWithStatus,
+  ToolManifest,
+  ToolResult,
+  ToolStatusChange
+} from '../types/electron';
 
 const api: IElectronAPI = {
   // App
@@ -24,6 +32,38 @@ const api: IElectronAPI = {
     ipcRenderer.on('chat:stream', handler);
     return () => {
       ipcRenderer.removeListener('chat:stream', handler);
+    };
+  },
+
+  // Tools
+  listTools: (): Promise<ToolWithStatus[]> => ipcRenderer.invoke('tools:list'),
+
+  getTool: (toolId: string): Promise<ToolWithStatus | null> =>
+    ipcRenderer.invoke('tools:get', toolId),
+
+  launchTool: (toolId: string): Promise<ToolResult> =>
+    ipcRenderer.invoke('tools:launch', toolId),
+
+  stopTool: (toolId: string): Promise<ToolResult> =>
+    ipcRenderer.invoke('tools:stop', toolId),
+
+  deleteTool: (toolId: string): Promise<ToolResult> =>
+    ipcRenderer.invoke('tools:delete', toolId),
+
+  getToolStatus: (toolId: string): Promise<'running' | 'stopped' | 'error'> =>
+    ipcRenderer.invoke('tools:status', toolId),
+
+  saveTool: (manifest: ToolManifest, files: Record<string, string>): Promise<ToolResult> =>
+    ipcRenderer.invoke('tools:save', manifest, files),
+
+  getToolsDirectory: (): Promise<string> => ipcRenderer.invoke('tools:getDirectory'),
+
+  onToolStatusChange: (callback: (change: ToolStatusChange) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, change: ToolStatusChange): void =>
+      callback(change);
+    ipcRenderer.on('tools:statusChange', handler);
+    return () => {
+      ipcRenderer.removeListener('tools:statusChange', handler);
     };
   }
 };

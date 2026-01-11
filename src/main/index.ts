@@ -3,6 +3,7 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc';
 import { agentProcess } from './services/agent-process';
+import { toolManager } from './services/tool-manager';
 import { setMainWindow } from './ipc/chat';
 
 let mainWindow: BrowserWindow | null = null;
@@ -31,9 +32,10 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
-  // Set the main window for agent process and IPC handlers
+  // Set the main window for agent process, IPC handlers, and tool manager
   agentProcess.setMainWindow(mainWindow);
   setMainWindow(mainWindow);
+  toolManager.setMainWindow(mainWindow);
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -59,6 +61,9 @@ app.whenReady().then(async () => {
 
   createWindow();
 
+  // Initialize tool manager (loads tools, starts autostart tools)
+  await toolManager.initialize();
+
   // Start the agent process after window is created
   await agentProcess.start();
 
@@ -77,8 +82,9 @@ app.on('window-all-closed', () => {
 
 // Clean shutdown
 app.on('before-quit', async () => {
+  await toolManager.shutdown();
   await agentProcess.stop();
 });
 
 // Export for use in IPC handlers
-export { mainWindow, agentProcess };
+export { mainWindow, agentProcess, toolManager };

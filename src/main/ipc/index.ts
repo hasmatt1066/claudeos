@@ -1,5 +1,6 @@
 import { ipcMain, app } from 'electron';
 import { setupChatHandlers } from './chat';
+import { setupToolHandlers } from './tools';
 
 export function setupIpcHandlers(): void {
   // App handlers
@@ -13,6 +14,9 @@ export function setupIpcHandlers(): void {
 
   // Chat handlers
   setupChatHandlers();
+
+  // Tool handlers
+  setupToolHandlers();
 
   console.log('IPC handlers initialized');
 }

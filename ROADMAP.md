@@ -6,7 +6,7 @@ This file tracks the phased build of ClaudeOS. Each phase is a discrete Ralph lo
 
 ## Current Phase
 
-**PHASE: 9**
+**PHASE: 10**
 
 Update this number after completing each phase.
 
@@ -24,7 +24,7 @@ Update this number after completing each phase.
 | 6 | Agent SDK Integration | complete | Connect chat to Claude |
 | 7 | Learning Window | complete | File operations display |
 | 8 | Tool Gallery UI | complete | Tool cards and management |
-| 9 | Tool Persistence | pending | Save/load/launch tools |
+| 9 | Tool Persistence | complete | Save/load/launch tools |
 | 10 | Context Brain | pending | LanceDB + embeddings |
 | 11 | Inbox Processor | pending | File watching + auto-organize |
 | 12 | System Tray | pending | Background operation |
@@ -147,4 +147,5 @@ Update this number after completing each phase.
 - **Phase 6 (2026-01-11):** Agent SDK integration complete. Streaming responses, session management, tool use logging, cost tracking.
 - **Phase 7 (2026-01-11):** Learning window complete. Collapsible panel shows file operations in real-time with icons and expandable details.
 - **Phase 8 (2026-01-11):** Tool gallery UI complete. Grid of tool cards with navigation sidebar, context menu, and mock data.
+- **Phase 9 (2026-01-11):** Tool persistence complete. ToolManager service, IPC handlers, tool manifests, child process spawning, real-time status updates.
 
