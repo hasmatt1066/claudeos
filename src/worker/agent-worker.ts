@@ -7,6 +7,7 @@
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import * as path from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { MessagePortMain } from 'electron';
 import { contextBrain } from './services/context-brain';
 
@@ -39,6 +40,26 @@ let messagePort: MessagePortMain | null = null;
 let currentSessionId: string | null = null;
 let contextBrainInitialized = false;
 let dataPath: string = '';
+let workspacePath: string = '';
+
+/**
+ * Initialize the user workspace directory
+ * This is where the agent operates - isolated from ClaudeOS source code
+ */
+function initWorkspace(): void {
+  if (workspacePath) return;
+
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+  workspacePath = path.join(homeDir, 'ClaudeOS', 'workspace');
+
+  // Create workspace directory if it doesn't exist
+  if (!existsSync(workspacePath)) {
+    mkdirSync(workspacePath, { recursive: true });
+    console.log('[Agent Worker] Created workspace directory:', workspacePath);
+  } else {
+    console.log('[Agent Worker] Using workspace directory:', workspacePath);
+  }
+}
 
 /**
  * Initialize the context brain
@@ -69,6 +90,9 @@ process.parentPort.on('message', (event) => {
     messagePort.on('message', (evt) => handleMessage(evt as unknown as MessageEvent));
     messagePort.start();
     console.log('[Agent Worker] Initialized with MessagePort');
+
+    // Initialize workspace directory (sync, fast)
+    initWorkspace();
 
     // Initialize context brain (async, don't block)
     initContextBrain().catch((err) => {
@@ -142,13 +166,18 @@ async function handleChat(payload: ChatPayload): Promise<void> {
       }
     }
 
+    // Ensure workspace is initialized before agent runs
+    if (!workspacePath) {
+      initWorkspace();
+    }
+
     const response = query({
       prompt: enhancedPrompt,
       options: {
         model: 'claude-sonnet-4-20250514',
         allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep'],
         permissionMode: 'acceptEdits',
-        cwd: process.cwd(),
+        cwd: workspacePath,
         resume: sessionId || undefined
       }
     });
