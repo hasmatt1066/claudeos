@@ -97,10 +97,12 @@ src/
 
 ## Current State
 
-**Phase:** Pre-development (documentation and architecture complete)
+**Phase:** 2 (Window Shell)
+
+Phase 1 complete: electron-vite scaffolded with React 19, TypeScript strict mode, ESLint, and Prettier.
 
 **Next Steps:**
-1. Scaffold Electron project with electron-vite
+1. Implement proper window shell with controls
 2. Implement basic chat interface
 3. Integrate Claude Agent SDK in utility process
 4. Build first proof of concept: chat → tool → gallery

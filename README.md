@@ -20,7 +20,11 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Pre-development.** Architecture and vision complete. Ready for build.
+**Phase 2 of 13.** Scaffold complete. Building window shell.
+
+- Phase 1: Scaffold electron-vite project
+- Phase 2: Basic Electron window (current)
+- Phase 3-13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 
