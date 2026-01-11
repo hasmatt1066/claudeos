@@ -31,6 +31,7 @@
     "@huggingface/transformers": "^3.8.1",
     "@lancedb/lancedb": "^0.23.0",
     "chokidar": "^5.0.0",
+    "electron-store": "^11.0.2",
     "file-type": "^21.3.0",
     "pdf-parse": "^2.4.5",
     "react": "^19.0.0",

@@ -3,7 +3,7 @@
  * Exposes context brain functionality to the renderer process
  */
 
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain } from 'electron';
 import { agentProcess, type WorkerMessage } from '../services/agent-process';
 
 // Store pending context requests
@@ -15,12 +15,7 @@ const pendingRequests = new Map<
   }
 >();
 
-let mainWindow: BrowserWindow | null = null;
 let requestIdCounter = 0;
-
-export function setMainWindow(window: BrowserWindow): void {
-  mainWindow = window;
-}
 
 /**
  * Generate unique request ID

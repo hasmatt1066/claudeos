@@ -3,9 +3,11 @@
  * Uses Transformers.js to generate embeddings locally
  */
 
-import { pipeline, type Pipeline } from '@huggingface/transformers';
+import { pipeline } from '@huggingface/transformers';
 
-let extractor: Pipeline | null = null;
+// Use 'any' to avoid complex union type issues with Transformers.js pipeline types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let extractor: any = null;
 let initPromise: Promise<void> | null = null;
 
 /**

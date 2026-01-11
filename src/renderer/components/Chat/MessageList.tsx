@@ -25,7 +25,11 @@ function MessageList({
   if (messages.length === 0 && !isTyping && !streamingContent) {
     return (
       <div className="message-list message-list-empty">
-        <div className="empty-state">Start a conversation...</div>
+        <div className="empty-state">
+          <div className="empty-state-icon">💬</div>
+          <div className="empty-state-title">Start a conversation with Claude</div>
+          <div className="empty-state-subtitle">Ask me to build something, explain code, or help with any task</div>
+        </div>
       </div>
     );
   }

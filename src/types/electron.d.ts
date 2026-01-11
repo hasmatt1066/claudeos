@@ -90,6 +90,8 @@ export interface IElectronAPI {
   // App
   getVersion: () => Promise<string>;
   getPlatform: () => Promise<NodeJS.Platform>;
+  onNewConversation: (callback: () => void) => () => void;
+  onOpenSettings: (callback: () => void) => () => void;
 
   // Chat
   sendMessage: (message: string, sessionId?: string) => Promise<ChatResponse>;

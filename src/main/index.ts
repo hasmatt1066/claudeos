@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, globalShortcut } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc';
@@ -7,14 +7,17 @@ import { toolManager } from './services/tool-manager';
 import { trayManager } from './services/tray-manager';
 import { InboxProcessor, type ProcessedFile } from './services/inbox-processor';
 import { setMainWindow } from './ipc/chat';
+import { loadWindowState, trackWindowState } from './services/window-state';
 
 let mainWindow: BrowserWindow | null = null;
 let inboxProcessor: InboxProcessor | null = null;
 
 function createWindow(): void {
+  // Load persisted window bounds
+  const windowBounds = loadWindowState();
+
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    ...windowBounds,
     title: 'ClaudeOS',
     show: false,
     autoHideMenuBar: true,
@@ -25,6 +28,9 @@ function createWindow(): void {
       nodeIntegration: false
     }
   });
+
+  // Track window state changes for persistence
+  trackWindowState(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
@@ -75,6 +81,23 @@ app.whenReady().then(async () => {
   toolManager.on('statusChange', () => {
     const runningTools = toolManager.getRunningToolNames();
     trayManager.updateMenu(runningTools);
+  });
+
+  // Register global keyboard shortcuts
+  globalShortcut.register('CommandOrControl+N', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('app:newConversation');
+    }
+  });
+
+  globalShortcut.register('CommandOrControl+,', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('app:openSettings');
+    }
   });
 
   // Start the agent process after window is created
@@ -129,6 +152,10 @@ app.on('before-quit', () => {
 
 app.on('will-quit', async (event) => {
   event.preventDefault();
+
+  // Unregister all shortcuts
+  globalShortcut.unregisterAll();
+
   await inboxProcessor?.stop();
   await toolManager.shutdown();
   await agentProcess.stop();

@@ -7,6 +7,7 @@
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import * as path from 'path';
+import { MessagePortMain } from 'electron';
 import { contextBrain } from './services/context-brain';
 
 interface WorkerMessage {
@@ -34,7 +35,7 @@ interface ContextSearchPayload {
   requestId?: string;
 }
 
-let messagePort: MessagePort | null = null;
+let messagePort: MessagePortMain | null = null;
 let currentSessionId: string | null = null;
 let contextBrainInitialized = false;
 let dataPath: string = '';
@@ -64,8 +65,8 @@ process.parentPort.on('message', (event) => {
 
   if (message.type === 'init' && event.ports[0]) {
     // Initialize MessagePort for communication
-    messagePort = event.ports[0];
-    messagePort.on('message', handleMessage);
+    messagePort = event.ports[0] as MessagePortMain;
+    messagePort.on('message', (evt) => handleMessage(evt as unknown as MessageEvent));
     messagePort.start();
     console.log('[Agent Worker] Initialized with MessagePort');
 

@@ -24,9 +24,24 @@
 }
 
 .empty-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  color: #eaeaea;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-subtitle {
   color: #666;
-  font-size: 1.1rem;
-  font-style: italic;
+  font-size: 0.875rem;
 }
 
 /* Messages */
@@ -128,6 +143,12 @@
 .message-bubble.streaming {
   border: 1px solid #667eea;
   border-left: 3px solid #667eea;
+}
+
+.message-bubble.error {
+  background-color: rgba(231, 76, 60, 0.15);
+  border-left: 3px solid #e74c3c;
+  color: #ff8a80;
 }
 
 /* Chat Input */

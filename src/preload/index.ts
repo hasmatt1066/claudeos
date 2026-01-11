@@ -20,6 +20,22 @@ const api: IElectronAPI = {
   getVersion: (): Promise<string> => ipcRenderer.invoke('app:getVersion'),
   getPlatform: (): Promise<NodeJS.Platform> => ipcRenderer.invoke('app:getPlatform'),
 
+  onNewConversation: (callback: () => void): (() => void) => {
+    const handler = (): void => callback();
+    ipcRenderer.on('app:newConversation', handler);
+    return () => {
+      ipcRenderer.removeListener('app:newConversation', handler);
+    };
+  },
+
+  onOpenSettings: (callback: () => void): (() => void) => {
+    const handler = (): void => callback();
+    ipcRenderer.on('app:openSettings', handler);
+    return () => {
+      ipcRenderer.removeListener('app:openSettings', handler);
+    };
+  },
+
   // Chat
   sendMessage: (message: string, sessionId?: string): Promise<ChatResponse> =>
     ipcRenderer.invoke('chat:send', message, sessionId),

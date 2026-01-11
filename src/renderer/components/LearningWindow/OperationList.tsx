@@ -20,7 +20,8 @@ function OperationList({ operations }: OperationListProps): React.JSX.Element {
     return (
       <div className="operation-list operation-list-empty">
         <div className="empty-state">
-          No operations yet. Claude's file operations will appear here.
+          <div className="empty-state-icon">👁️</div>
+          <div className="empty-state-text">Claude's actions will appear here</div>
         </div>
       </div>
     );

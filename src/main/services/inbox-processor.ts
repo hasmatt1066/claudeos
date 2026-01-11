@@ -3,14 +3,15 @@
  * Watches ~/ClaudeOS/inbox/ for new files and auto-organizes them
  */
 
-import chokidar from 'chokidar';
+import chokidar, { FSWatcher } from 'chokidar';
 import { fileTypeFromFile } from 'file-type';
 import fs from 'fs/promises';
 import path from 'path';
 import { BrowserWindow } from 'electron';
 
 // PDF parsing - dynamic import for ESM compatibility
-let pdfParse: typeof import('pdf-parse') | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pdfParse: ((buffer: Buffer) => Promise<{ text: string }>) | null = null;
 
 export interface ProcessedFile {
   originalPath: string;
@@ -34,7 +35,7 @@ interface FileInfo {
 }
 
 export class InboxProcessor {
-  private watcher: chokidar.FSWatcher | null = null;
+  private watcher: FSWatcher | null = null;
   private inboxPath: string;
   private contextPath: string;
   private onFileProcessed: (file: ProcessedFile) => Promise<void>;
@@ -69,7 +70,9 @@ export class InboxProcessor {
 
     // Load pdf-parse dynamically
     try {
-      pdfParse = (await import('pdf-parse')).default;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfModule = await import('pdf-parse') as any;
+      pdfParse = pdfModule.default || pdfModule;
       console.log('[InboxProcessor] PDF parsing enabled');
     } catch (e) {
       console.warn('[InboxProcessor] PDF parsing not available:', e);
@@ -86,11 +89,11 @@ export class InboxProcessor {
       ignored: /(^|[\/\\])\../ // Ignore dotfiles
     });
 
-    this.watcher.on('add', (filePath) => this.processFile(filePath));
+    this.watcher.on('add', (filePath: string) => this.processFile(filePath));
     this.watcher.on('ready', () => {
       console.log('[InboxProcessor] Ready and watching:', this.inboxPath);
     });
-    this.watcher.on('error', (error) => {
+    this.watcher.on('error', (error: unknown) => {
       console.error('[InboxProcessor] Watcher error:', error);
     });
 
@@ -290,7 +293,7 @@ export class InboxProcessor {
   /**
    * Generate a semantic filename with timestamp
    */
-  private generateName(original: string, fileInfo: FileInfo, text: string): string {
+  private generateName(original: string, _fileInfo: FileInfo, _text: string): string {
     const ext = path.extname(original);
     const base = path.basename(original, ext);
     const timestamp = new Date().toISOString().slice(0, 10);

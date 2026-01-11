@@ -6,6 +6,7 @@ export interface MessageData {
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
+  isError?: boolean;
 }
 
 interface MessageProps {
@@ -14,10 +15,15 @@ interface MessageProps {
 
 function Message({ message }: MessageProps): React.JSX.Element {
   const isUser = message.role === 'user';
+  const bubbleClasses = [
+    'message-bubble',
+    message.isStreaming ? 'streaming' : '',
+    message.isError ? 'error' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div className={`message ${isUser ? 'message-user' : 'message-assistant'}`}>
-      <div className={`message-bubble ${message.isStreaming ? 'streaming' : ''}`}>
+      <div className={bubbleClasses}>
         <div className="message-content">
           {message.content}
           {message.isStreaming && <span className="cursor-blink">|</span>}

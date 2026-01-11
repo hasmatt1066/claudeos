@@ -20,7 +20,7 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 13 of 13.** System tray complete. Final polish and integration.
+**v0.1.0 Complete.** All 13 phases done. ClaudeOS is ready.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window

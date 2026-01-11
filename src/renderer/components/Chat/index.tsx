@@ -53,6 +53,20 @@ function Chat(): React.JSX.Element {
 
         case 'error':
           console.error('[Chat] Stream error:', chunk.error);
+          // Add error message to chat
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: generateId(),
+              role: 'assistant',
+              content: `Error: ${chunk.error || 'An unexpected error occurred'}`,
+              timestamp: new Date(),
+              isError: true
+            }
+          ]);
+          setIsTyping(false);
+          setStreamingContent('');
+          streamingContentRef.current = '';
           break;
       }
     });

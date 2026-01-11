@@ -27,7 +27,6 @@ export interface SearchResult {
 export class ContextBrain {
   private db: lancedb.Connection | null = null;
   private table: lancedb.Table | null = null;
-  private dbPath: string = '';
   private initialized = false;
 
   /**
@@ -37,7 +36,6 @@ export class ContextBrain {
   async initialize(dbPath: string): Promise<void> {
     if (this.initialized) return;
 
-    this.dbPath = dbPath;
     console.log('[ContextBrain] Initializing at:', dbPath);
 
     // Initialize embeddings first
@@ -124,13 +122,13 @@ export class ContextBrain {
 
     try {
       // Try hybrid search with RRF reranking
-      const results = await this.table
-        .query()
-        .fullTextSearch(query)
-        .nearestTo(queryVector)
-        .rerank(lancedb.RRFReranker())
-        .limit(limit)
-        .toArray();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const reranker = (lancedb as any).rerankers?.rrf?.() || (lancedb as any).RRFReranker?.();
+      let queryBuilder = this.table.query().fullTextSearch(query).nearestTo(queryVector);
+      if (reranker) {
+        queryBuilder = queryBuilder.rerank(reranker);
+      }
+      const results = await queryBuilder.limit(limit).toArray();
 
       return results.map((row) => ({
         id: row.id as string,

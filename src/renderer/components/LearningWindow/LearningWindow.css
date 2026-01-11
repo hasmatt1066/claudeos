@@ -104,10 +104,18 @@
 }
 
 .operation-list-empty .empty-state {
-  color: #666;
-  font-size: 0.8rem;
   text-align: center;
   padding: 1rem;
+}
+
+.operation-list-empty .empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.operation-list-empty .empty-state-text {
+  color: #666;
+  font-size: 0.8rem;
   font-style: italic;
 }
 
