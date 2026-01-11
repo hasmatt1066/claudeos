@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc';
 import { agentProcess } from './services/agent-process';
 import { toolManager } from './services/tool-manager';
+import { trayManager } from './services/tray-manager';
 import { InboxProcessor, type ProcessedFile } from './services/inbox-processor';
 import { setMainWindow } from './ipc/chat';
 
@@ -34,10 +35,11 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
-  // Set the main window for agent process, IPC handlers, and tool manager
+  // Set the main window for agent process, IPC handlers, tool manager, and tray
   agentProcess.setMainWindow(mainWindow);
   setMainWindow(mainWindow);
   toolManager.setMainWindow(mainWindow);
+  trayManager.setMainWindow(mainWindow);
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -65,6 +67,15 @@ app.whenReady().then(async () => {
 
   // Initialize tool manager (loads tools, starts autostart tools)
   await toolManager.initialize();
+
+  // Create system tray
+  trayManager.create();
+
+  // Wire tool manager status changes to tray
+  toolManager.on('statusChange', () => {
+    const runningTools = toolManager.getRunningToolNames();
+    trayManager.updateMenu(runningTools);
+  });
 
   // Start the agent process after window is created
   await agentProcess.start();
@@ -104,19 +115,26 @@ app.whenReady().then(async () => {
   });
 });
 
-// Quit when all windows are closed, except on macOS
+// Keep app running when windows are closed - tray keeps us alive
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // Don't quit - the tray will keep the app running
+  // On macOS, apps typically stay active until the user quits explicitly
+  // On Windows/Linux, the tray handles this
 });
 
 // Clean shutdown
-app.on('before-quit', async () => {
+app.on('before-quit', () => {
+  trayManager.setQuitting(true);
+});
+
+app.on('will-quit', async (event) => {
+  event.preventDefault();
   await inboxProcessor?.stop();
   await toolManager.shutdown();
   await agentProcess.stop();
+  trayManager.destroy();
+  app.exit(0);
 });
 
 // Export for use in IPC handlers
-export { mainWindow, agentProcess, toolManager, inboxProcessor };
+export { mainWindow, agentProcess, toolManager, inboxProcessor, trayManager };

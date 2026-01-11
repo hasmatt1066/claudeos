@@ -1,4 +1,5 @@
 import { fork, ChildProcess } from 'child_process';
+import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
@@ -19,13 +20,14 @@ export interface ToolWithStatus extends ToolManifest {
   status: 'stopped' | 'running' | 'error';
 }
 
-export class ToolManager {
+export class ToolManager extends EventEmitter {
   private tools: Map<string, ToolManifest> = new Map();
   private processes: Map<string, ChildProcess> = new Map();
   private toolsDir: string;
   private mainWindow: BrowserWindow | null = null;
 
   constructor() {
+    super();
     // Use user's home directory for ClaudeOS data
     const homeDir = app.getPath('home');
     this.toolsDir = path.join(homeDir, 'ClaudeOS', 'tools');
@@ -218,6 +220,22 @@ export class ToolManager {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.webContents.send('tools:statusChange', { toolId, status });
     }
+    // Emit event for other listeners (e.g., TrayManager)
+    this.emit('statusChange', { toolId, status });
+  }
+
+  /**
+   * Get names of all currently running tools
+   */
+  getRunningToolNames(): string[] {
+    const names: string[] = [];
+    for (const [toolId] of this.processes) {
+      const tool = this.tools.get(toolId);
+      if (tool) {
+        names.push(tool.name);
+      }
+    }
+    return names;
   }
 
   async shutdown(): Promise<void> {

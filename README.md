@@ -20,7 +20,7 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 12 of 13.** Inbox processor complete. Building system tray.
+**Phase 13 of 13.** System tray complete. Final polish and integration.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window

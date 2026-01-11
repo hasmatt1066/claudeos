@@ -6,7 +6,7 @@ This file tracks the phased build of ClaudeOS. Each phase is a discrete Ralph lo
 
 ## Current Phase
 
-**PHASE: 12**
+**PHASE: 13**
 
 Update this number after completing each phase.
 
@@ -27,7 +27,7 @@ Update this number after completing each phase.
 | 9 | Tool Persistence | complete | Save/load/launch tools |
 | 10 | Context Brain | complete | LanceDB + embeddings |
 | 11 | Inbox Processor | complete | File watching + auto-organize |
-| 12 | System Tray | pending | Background operation |
+| 12 | System Tray | complete | Background operation |
 | 13 | Polish & Integration | pending | Final integration pass |
 
 ---
@@ -150,4 +150,5 @@ Update this number after completing each phase.
 - **Phase 9 (2026-01-11):** Tool persistence complete. ToolManager service, IPC handlers, tool manifests, child process spawning, real-time status updates.
 - **Phase 10 (2026-01-11):** Context brain complete. LanceDB + Transformers.js for local semantic search, hybrid search with RRF reranking, agent context retrieval.
 - **Phase 11 (2026-01-11):** Inbox processor complete. Chokidar file watching, file-type detection, PDF text extraction, auto-categorization, context brain indexing.
+- **Phase 12 (2026-01-11):** System tray complete. TrayManager service, hide-to-tray on close, running tools in menu and tooltip, cross-platform support.
 
