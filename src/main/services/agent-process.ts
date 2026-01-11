@@ -1,6 +1,7 @@
 import { utilityProcess, MessageChannelMain, BrowserWindow } from 'electron';
 import path from 'path';
 import { handleWorkerResponse } from '../ipc/chat';
+import { handleContextResponse } from '../ipc/context';
 
 export interface WorkerMessage {
   type: string;
@@ -58,6 +59,11 @@ export class AgentProcessManager {
       // Route all chat-related messages through handleWorkerResponse
       if (message.type.startsWith('chat:')) {
         handleWorkerResponse(message as Parameters<typeof handleWorkerResponse>[0]);
+      }
+
+      // Route context-related messages through handleContextResponse
+      if (message.type.startsWith('context:')) {
+        handleContextResponse(message);
       }
 
       // Forward to renderer if we have a window

@@ -6,7 +6,10 @@ import type {
   ToolWithStatus,
   ToolManifest,
   ToolResult,
-  ToolStatusChange
+  ToolStatusChange,
+  ContextAddResult,
+  ContextSearchResult,
+  ContextCountResult
 } from '../types/electron';
 
 const api: IElectronAPI = {
@@ -65,7 +68,16 @@ const api: IElectronAPI = {
     return () => {
       ipcRenderer.removeListener('tools:statusChange', handler);
     };
-  }
+  },
+
+  // Context Brain
+  contextAdd: (params: { path: string; text: string; type: string }): Promise<ContextAddResult> =>
+    ipcRenderer.invoke('context:add', params),
+
+  contextSearch: (query: string, limit?: number): Promise<ContextSearchResult> =>
+    ipcRenderer.invoke('context:search', query, limit),
+
+  contextCount: (): Promise<ContextCountResult> => ipcRenderer.invoke('context:count')
 };
 
 // Use contextBridge to safely expose APIs to renderer

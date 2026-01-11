@@ -6,6 +6,8 @@
  */
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
+import * as path from 'path';
+import { contextBrain } from './services/context-brain';
 
 interface WorkerMessage {
   type: string;
@@ -19,8 +21,42 @@ interface ChatPayload {
   sessionId?: string;
 }
 
+interface ContextAddPayload {
+  path: string;
+  text: string;
+  type: string;
+  requestId?: string;
+}
+
+interface ContextSearchPayload {
+  query: string;
+  limit?: number;
+  requestId?: string;
+}
+
 let messagePort: MessagePort | null = null;
 let currentSessionId: string | null = null;
+let contextBrainInitialized = false;
+let dataPath: string = '';
+
+/**
+ * Initialize the context brain
+ */
+async function initContextBrain(): Promise<void> {
+  if (contextBrainInitialized) return;
+
+  try {
+    // Get home directory from environment or default
+    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+    dataPath = path.join(homeDir, 'ClaudeOS', 'data', 'context-brain');
+
+    await contextBrain.initialize(dataPath);
+    contextBrainInitialized = true;
+    console.log('[Agent Worker] Context brain initialized at:', dataPath);
+  } catch (error) {
+    console.error('[Agent Worker] Failed to initialize context brain:', error);
+  }
+}
 
 // Handle messages from parent (main process)
 process.parentPort.on('message', (event) => {
@@ -32,6 +68,11 @@ process.parentPort.on('message', (event) => {
     messagePort.on('message', handleMessage);
     messagePort.start();
     console.log('[Agent Worker] Initialized with MessagePort');
+
+    // Initialize context brain (async, don't block)
+    initContextBrain().catch((err) => {
+      console.error('[Agent Worker] Context brain init error:', err);
+    });
 
     // Send ready message
     sendMessage({ type: 'ready' });
@@ -51,6 +92,18 @@ function handleMessage(event: MessageEvent): void {
       sendMessage({ type: 'pong' });
       break;
 
+    case 'context:add':
+      handleContextAdd(message.payload as ContextAddPayload);
+      break;
+
+    case 'context:search':
+      handleContextSearch(message.payload as ContextSearchPayload);
+      break;
+
+    case 'context:count':
+      handleContextCount(message.payload as { requestId?: string });
+      break;
+
     default:
       console.log('[Agent Worker] Unknown message type:', message.type);
   }
@@ -67,8 +120,29 @@ async function handleChat(payload: ChatPayload): Promise<void> {
       payload: { requestId }
     });
 
+    // Retrieve relevant context from the context brain
+    let enhancedPrompt = message;
+    if (contextBrainInitialized) {
+      try {
+        const relevantContext = await contextBrain.search(message, 5);
+        if (relevantContext.length > 0) {
+          const contextString = relevantContext
+            .filter((doc) => doc.fileType !== 'system')
+            .map((doc) => `[From ${doc.filePath}]: ${doc.text.slice(0, 500)}`)
+            .join('\n\n');
+
+          if (contextString) {
+            enhancedPrompt = `Context from user's documents:\n${contextString}\n\nUser message: ${message}`;
+            console.log('[Agent Worker] Added context from', relevantContext.length, 'documents');
+          }
+        }
+      } catch (contextError) {
+        console.warn('[Agent Worker] Context retrieval failed:', contextError);
+      }
+    }
+
     const response = query({
-      prompt: message,
+      prompt: enhancedPrompt,
       options: {
         model: 'claude-sonnet-4-20250514',
         allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep'],
@@ -158,6 +232,98 @@ async function handleChat(payload: ChatPayload): Promise<void> {
       payload: {
         success: false,
         content: `Error: ${errorMessage}`,
+        requestId
+      }
+    });
+  }
+}
+
+/**
+ * Handle adding a document to the context brain
+ */
+async function handleContextAdd(payload: ContextAddPayload): Promise<void> {
+  const { path: filePath, text, type: fileType, requestId } = payload;
+
+  try {
+    if (!contextBrainInitialized) {
+      await initContextBrain();
+    }
+
+    await contextBrain.addDocument(filePath, text, fileType);
+
+    sendMessage({
+      type: 'context:add:result',
+      payload: { success: true, requestId }
+    });
+  } catch (error) {
+    console.error('[Agent Worker] Context add error:', error);
+    sendMessage({
+      type: 'context:add:result',
+      payload: {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestId
+      }
+    });
+  }
+}
+
+/**
+ * Handle searching the context brain
+ */
+async function handleContextSearch(payload: ContextSearchPayload): Promise<void> {
+  const { query: searchQuery, limit = 10, requestId } = payload;
+
+  try {
+    if (!contextBrainInitialized) {
+      await initContextBrain();
+    }
+
+    const results = await contextBrain.search(searchQuery, limit);
+
+    sendMessage({
+      type: 'context:search:result',
+      payload: { success: true, results, requestId }
+    });
+  } catch (error) {
+    console.error('[Agent Worker] Context search error:', error);
+    sendMessage({
+      type: 'context:search:result',
+      payload: {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        results: [],
+        requestId
+      }
+    });
+  }
+}
+
+/**
+ * Handle getting document count
+ */
+async function handleContextCount(payload: { requestId?: string }): Promise<void> {
+  const { requestId } = payload;
+
+  try {
+    if (!contextBrainInitialized) {
+      await initContextBrain();
+    }
+
+    const count = await contextBrain.count();
+
+    sendMessage({
+      type: 'context:count:result',
+      payload: { success: true, count, requestId }
+    });
+  } catch (error) {
+    console.error('[Agent Worker] Context count error:', error);
+    sendMessage({
+      type: 'context:count:result',
+      payload: {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        count: 0,
         requestId
       }
     });

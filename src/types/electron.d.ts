@@ -45,6 +45,31 @@ export interface ToolResult {
   error?: string;
 }
 
+export interface ContextDocument {
+  id: string;
+  filePath: string;
+  text: string;
+  createdAt: number;
+  fileType: string;
+}
+
+export interface ContextSearchResult {
+  success: boolean;
+  results: ContextDocument[];
+  error?: string;
+}
+
+export interface ContextCountResult {
+  success: boolean;
+  count: number;
+  error?: string;
+}
+
+export interface ContextAddResult {
+  success: boolean;
+  error?: string;
+}
+
 export interface IElectronAPI {
   // App
   getVersion: () => Promise<string>;
@@ -65,6 +90,11 @@ export interface IElectronAPI {
   saveTool: (manifest: ToolManifest, files: Record<string, string>) => Promise<ToolResult>;
   getToolsDirectory: () => Promise<string>;
   onToolStatusChange: (callback: (change: ToolStatusChange) => void) => () => void;
+
+  // Context Brain
+  contextAdd: (params: { path: string; text: string; type: string }) => Promise<ContextAddResult>;
+  contextSearch: (query: string, limit?: number) => Promise<ContextSearchResult>;
+  contextCount: () => Promise<ContextCountResult>;
 }
 
 declare global {
