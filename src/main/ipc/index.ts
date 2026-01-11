@@ -2,6 +2,7 @@ import { ipcMain, app } from 'electron';
 import { setupChatHandlers } from './chat';
 import { setupToolHandlers } from './tools';
 import { setupContextHandlers } from './context';
+import { setupInboxHandlers } from './inbox';
 
 export function setupIpcHandlers(): void {
   // App handlers
@@ -21,6 +22,9 @@ export function setupIpcHandlers(): void {
 
   // Context brain handlers
   setupContextHandlers();
+
+  // Inbox processor handlers
+  setupInboxHandlers();
 
   console.log('IPC handlers initialized');
 }

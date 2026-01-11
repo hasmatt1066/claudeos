@@ -70,6 +70,22 @@ export interface ContextAddResult {
   error?: string;
 }
 
+export interface InboxProcessedEvent {
+  fileName: string;
+  category: string;
+  originalName: string;
+}
+
+export interface InboxErrorEvent {
+  fileName: string;
+  error: string;
+}
+
+export interface InboxProcessingEvent {
+  fileName: string;
+  status: 'started' | 'completed' | 'error';
+}
+
 export interface IElectronAPI {
   // App
   getVersion: () => Promise<string>;
@@ -95,6 +111,13 @@ export interface IElectronAPI {
   contextAdd: (params: { path: string; text: string; type: string }) => Promise<ContextAddResult>;
   contextSearch: (query: string, limit?: number) => Promise<ContextSearchResult>;
   contextCount: () => Promise<ContextCountResult>;
+
+  // Inbox Processor
+  getInboxPath: () => Promise<string>;
+  getContextPath: () => Promise<string>;
+  onInboxProcessed: (callback: (event: InboxProcessedEvent) => void) => () => void;
+  onInboxError: (callback: (event: InboxErrorEvent) => void) => () => void;
+  onInboxProcessing: (callback: (event: InboxProcessingEvent) => void) => () => void;
 }
 
 declare global {

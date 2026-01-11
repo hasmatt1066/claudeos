@@ -20,7 +20,7 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 11 of 13.** Context brain complete. Building inbox processor.
+**Phase 12 of 13.** Inbox processor complete. Building system tray.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window
@@ -32,8 +32,9 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 - Phase 8: Tool Gallery UI
 - Phase 9: Tool Persistence
 - Phase 10: Context Brain
-- Phase 11: Inbox Processor (current)
-- Phase 12-13: See [ROADMAP.md](./ROADMAP.md)
+- Phase 11: Inbox Processor
+- Phase 12: System Tray (current)
+- Phase 13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 

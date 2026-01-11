@@ -9,7 +9,10 @@ import type {
   ToolStatusChange,
   ContextAddResult,
   ContextSearchResult,
-  ContextCountResult
+  ContextCountResult,
+  InboxProcessedEvent,
+  InboxErrorEvent,
+  InboxProcessingEvent
 } from '../types/electron';
 
 const api: IElectronAPI = {
@@ -77,7 +80,39 @@ const api: IElectronAPI = {
   contextSearch: (query: string, limit?: number): Promise<ContextSearchResult> =>
     ipcRenderer.invoke('context:search', query, limit),
 
-  contextCount: (): Promise<ContextCountResult> => ipcRenderer.invoke('context:count')
+  contextCount: (): Promise<ContextCountResult> => ipcRenderer.invoke('context:count'),
+
+  // Inbox Processor
+  getInboxPath: (): Promise<string> => ipcRenderer.invoke('inbox:getPath'),
+
+  getContextPath: (): Promise<string> => ipcRenderer.invoke('inbox:getContextPath'),
+
+  onInboxProcessed: (callback: (event: InboxProcessedEvent) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: InboxProcessedEvent): void =>
+      callback(data);
+    ipcRenderer.on('inbox:processed', handler);
+    return () => {
+      ipcRenderer.removeListener('inbox:processed', handler);
+    };
+  },
+
+  onInboxError: (callback: (event: InboxErrorEvent) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: InboxErrorEvent): void =>
+      callback(data);
+    ipcRenderer.on('inbox:error', handler);
+    return () => {
+      ipcRenderer.removeListener('inbox:error', handler);
+    };
+  },
+
+  onInboxProcessing: (callback: (event: InboxProcessingEvent) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: InboxProcessingEvent): void =>
+      callback(data);
+    ipcRenderer.on('inbox:processing', handler);
+    return () => {
+      ipcRenderer.removeListener('inbox:processing', handler);
+    };
+  }
 };
 
 // Use contextBridge to safely expose APIs to renderer
