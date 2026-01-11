@@ -1,10 +1,20 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
+import type { IElectronAPI, ChatResponse } from '../types/electron';
 
-// Expose protected methods that allow the renderer process to use
-// the ipcRenderer without exposing the entire object
-const api = {
-  // Placeholder API - will be expanded in Phase 4
-  platform: process.platform
+const api: IElectronAPI = {
+  // App
+  getVersion: (): Promise<string> => ipcRenderer.invoke('app:getVersion'),
+  getPlatform: (): Promise<NodeJS.Platform> => ipcRenderer.invoke('app:getPlatform'),
+
+  // Chat
+  sendMessage: (message: string): Promise<ChatResponse> => ipcRenderer.invoke('chat:send', message),
+  onMessage: (callback: (data: unknown) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: unknown): void => callback(data);
+    ipcRenderer.on('chat:message', handler);
+    return () => {
+      ipcRenderer.removeListener('chat:message', handler);
+    };
+  }
 };
 
 // Use contextBridge to safely expose APIs to renderer
@@ -15,6 +25,6 @@ if (process.contextIsolated) {
     console.error('Failed to expose electronAPI:', error);
   }
 } else {
-  // @ts-ignore - fallback for when context isolation is disabled (not recommended)
-  window.electronAPI = api;
+  // Fallback for when context isolation is disabled (not recommended)
+  (window as Window & { electronAPI: IElectronAPI }).electronAPI = api;
 }

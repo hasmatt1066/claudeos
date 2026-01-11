@@ -20,13 +20,14 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 4 of 13.** Chat UI complete. Building IPC infrastructure.
+**Phase 5 of 13.** IPC infrastructure complete. Building utility process.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window
 - Phase 3: Chat UI
-- Phase 4: IPC Infrastructure (current)
-- Phase 5-13: See [ROADMAP.md](./ROADMAP.md)
+- Phase 4: IPC Infrastructure
+- Phase 5: Utility Process (current)
+- Phase 6-13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 

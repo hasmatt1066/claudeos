@@ -12,7 +12,7 @@ function Chat(): React.JSX.Element {
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [isTyping, setIsTyping] = useState(false);
 
-  const handleSend = useCallback((content: string) => {
+  const handleSend = useCallback(async (content: string) => {
     // Add user message
     const userMessage: MessageData = {
       id: generateId(),
@@ -24,18 +24,32 @@ function Chat(): React.JSX.Element {
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate typing delay and add placeholder response
-    setTimeout(() => {
+    try {
+      // Send message via IPC to main process
+      const result = await window.electronAPI.sendMessage(content);
+
       const assistantMessage: MessageData = {
         id: generateId(),
         role: 'assistant',
-        content: "I'm ClaudeOS. I'll be connected soon!",
+        content: result.success ? result.response : 'Sorry, something went wrong.',
         timestamp: new Date()
       };
 
-      setIsTyping(false);
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+
+      const errorMessage: MessageData = {
+        id: generateId(),
+        role: 'assistant',
+        content: 'Failed to communicate with the main process.',
+        timestamp: new Date()
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   }, []);
 
   return (

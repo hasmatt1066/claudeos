@@ -1,6 +1,7 @@
 import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { setupIpcHandlers } from './ipc';
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -38,6 +39,9 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.claudeos');
+
+  // Setup IPC handlers
+  setupIpcHandlers();
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production

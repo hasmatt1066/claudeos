@@ -97,13 +97,13 @@ src/
 
 ## Current State
 
-**Phase:** 4 (IPC Infrastructure)
+**Phase:** 5 (Utility Process)
 
-Phases 1-3 complete: electron-vite scaffold, secure window shell, chat UI with placeholder responses.
+Phases 1-4 complete: electron-vite scaffold, secure window shell, chat UI, IPC infrastructure with typed API.
 
 **Next Steps:**
-1. Set up IPC infrastructure (main ↔ renderer)
-2. Set up MessagePort for streaming
+1. Set up utility process for agent worker
+2. MessagePort communication with main
 3. Integrate Claude Agent SDK in utility process
 4. Build first proof of concept: chat → tool → gallery
 
