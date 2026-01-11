@@ -20,7 +20,7 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 8 of 13.** Learning window complete. Building tool gallery UI.
+**Phase 9 of 13.** Tool gallery complete. Building tool persistence.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window
@@ -29,8 +29,9 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 - Phase 5: Utility Process
 - Phase 6: Agent SDK Integration
 - Phase 7: Learning Window
-- Phase 8: Tool Gallery UI (current)
-- Phase 9-13: See [ROADMAP.md](./ROADMAP.md)
+- Phase 8: Tool Gallery UI
+- Phase 9: Tool Persistence (current)
+- Phase 10-13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 
