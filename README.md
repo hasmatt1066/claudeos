@@ -20,7 +20,63 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-Early exploration. See [VISION.md](./VISION.md) for the full picture.
+**Pre-development.** Architecture and vision complete. Ready for build.
+
+## Building ClaudeOS
+
+This project is designed to be built using [Ralph Wiggum](https://github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum) autonomous development loops.
+
+### Prerequisites
+
+- Node.js 20+
+- Claude Code CLI (authenticated)
+- Ralph Wiggum plugin: `/plugin install ralph-wiggum@claude-plugins-official`
+
+### How to Build
+
+1. **Check current phase:**
+   ```bash
+   cat ROADMAP.md | grep "PHASE:"
+   ```
+
+2. **Run Ralph loop:**
+   ```bash
+   /ralph-loop "Read PROMPT.md and complete the current phase. When all acceptance criteria are met and the app runs without errors, output <promise>COMPLETE</promise>. If blocked, create BLOCKERS.md and output <promise>BLOCKED</promise>." --completion-promise "COMPLETE" --max-iterations 25
+   ```
+
+3. **After completion:**
+   - Review changes
+   - Commit: `git add -A && git commit -m "Complete phase X"`
+   - Update phase in ROADMAP.md
+   - Run next loop
+
+### Build Phases
+
+| Phase | Description |
+|-------|-------------|
+| 1 | Scaffold electron-vite project |
+| 2 | Basic Electron window |
+| 3 | Chat UI component |
+| 4 | IPC infrastructure |
+| 5 | Utility process (agent worker) |
+| 6 | Claude Agent SDK integration |
+| 7 | Learning window |
+| 8 | Tool gallery UI |
+| 9 | Tool persistence |
+| 10 | Context brain (LanceDB) |
+| 11 | Inbox processor |
+| 12 | System tray |
+| 13 | Polish & integration |
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [VISION.md](./VISION.md) | Product vision, user stories, personas |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | Developer guide |
+| [ROADMAP.md](./ROADMAP.md) | Build phases and progress |
+| [CLAUDE.md](./CLAUDE.md) | Project context for Claude Code |
 
 ## License
 
