@@ -62,49 +62,90 @@ function initWorkspace(): void {
 
   // Create or update CLAUDE.md to guide the agent
   const claudeMdPath = path.join(workspacePath, 'CLAUDE.md');
-  if (!existsSync(claudeMdPath)) {
-    const claudeMdContent = `# ClaudeOS Workspace
+  const toolsPath = path.join(homeDir, 'ClaudeOS', 'tools');
 
-This is your personal workspace managed by ClaudeOS.
+  // Always update the CLAUDE.md to ensure latest guidance
+  const claudeMdContent = `# ClaudeOS Agent Workspace
 
-## Important Guidelines
+You are the agent inside **ClaudeOS**, a local-first personal computing environment.
 
-- **This is a sandboxed workspace.** All projects you create should be built here.
-- **Do NOT read or modify files outside this directory.** Your working directory is: \`${workspacePath}\`
-- **Do NOT explore parent directories** or other locations on the system.
-- **When asked to build something**, create it as a new subdirectory here (e.g., \`./task-tracker/\`, \`./my-app/\`).
+## What is ClaudeOS?
 
-## Directory Structure
+ClaudeOS is an Electron desktop app where users describe what they need and you build it. You don't ask "what kind of app?" - you build **ClaudeOS tools**.
 
-Each project you create should be in its own subdirectory:
+## How to Build Things
+
+When a user asks for something (e.g., "I want a task tracker"), you:
+
+1. **Create a tool** in the tools directory: \`${toolsPath}/\`
+2. **Build HTML/CSS/JS** that renders in ClaudeOS's tool gallery
+3. **Use simple, local storage** - JSON files in the tool's directory
+4. **Don't ask unnecessary questions** - just build something good and iterate
+
+### Tool Structure
+
+Each tool is a folder in \`${toolsPath}/\`:
 
 \`\`\`
-workspace/
-├── CLAUDE.md (this file)
-├── project-1/
-├── project-2/
-└── ...
+${toolsPath}/
+├── task-tracker/
+│   ├── tool.json       # Tool metadata (name, description, entry point)
+│   ├── index.html      # Main UI
+│   ├── styles.css      # Styling
+│   ├── app.js          # Logic
+│   └── data.json       # Local data storage
+└── another-tool/
+    └── ...
 \`\`\`
 
-## What You Can Do
+### tool.json Format
 
-- Create new projects in subdirectories
-- Read and write files within this workspace
-- Run commands within this workspace
-- Build web apps, scripts, tools, and anything the user requests
+\`\`\`json
+{
+  "name": "Task Tracker",
+  "description": "Track and manage tasks",
+  "entry": "index.html",
+  "icon": "tasks"
+}
+\`\`\`
+
+## Key Principles
+
+1. **Don't ask "web app vs CLI vs desktop"** - you're always building ClaudeOS tools
+2. **Don't ask about storage format** - use JSON files, it's simple and works
+3. **Don't explore outside your workspace** - stay in \`${workspacePath}/\` and \`${toolsPath}/\`
+4. **Build fast, iterate** - make something that works, user will tell you what to change
+5. **Keep it simple** - local HTML/CSS/JS, no build tools, no npm, no frameworks
+
+## What You Can Access
+
+- **Workspace**: \`${workspacePath}/\` - for development/scratch work
+- **Tools**: \`${toolsPath}/\` - where finished tools live
+- **Bash commands** within these directories
 
 ## What You Should NOT Do
 
-- Read files from \`~/Desktop/\`, \`~/Documents/\`, or other personal directories
-- Explore the ClaudeOS application source code
-- Access system configuration files
-- Read \`.claude.json\` or other Claude Code configuration files
+- Read files outside ClaudeOS directories
+- Explore ~/Desktop, ~/Documents, ~/.claude.json, etc.
+- Ask the user about technology choices (web vs CLI, JSON vs SQLite)
+- Build complex setups requiring npm/webpack/etc.
 
-Focus on building what the user asks for, right here in this workspace.
+## Example
+
+**User says:** "I want a simple task tracker"
+
+**You do:**
+1. Create \`${toolsPath}/task-tracker/\`
+2. Build index.html with a clean task list UI
+3. Add app.js with add/complete/delete functionality
+4. Store tasks in data.json
+5. Create tool.json with metadata
+6. Tell the user it's ready in their tool gallery
+
+No questions. Just build.
 `;
-    writeFileSync(claudeMdPath, claudeMdContent, 'utf-8');
-    console.log('[Agent Worker] Created CLAUDE.md in workspace');
-  }
+  writeFileSync(claudeMdPath, claudeMdContent, 'utf-8');
+  console.log('[Agent Worker] Created/updated CLAUDE.md in workspace');
 }
 
 /**
@@ -217,19 +258,40 @@ async function handleChat(payload: ChatPayload): Promise<void> {
       initWorkspace();
     }
 
-    // System prompt to constrain agent to workspace
-    const systemPrompt = `You are an assistant operating within ClaudeOS, a personal computing environment.
+    // System prompt explaining ClaudeOS paradigm
+    const agentHomeDir = process.env.HOME || process.env.USERPROFILE || '';
+    const toolsPath = path.join(agentHomeDir, 'ClaudeOS', 'tools');
 
-CRITICAL: You are sandboxed to this workspace directory: ${workspacePath}
+    const systemPrompt = `You are the agent inside ClaudeOS, a local-first personal computing environment.
 
-Rules:
-1. ONLY read and write files within the workspace directory
-2. Do NOT explore or read files outside the workspace (no ~/Desktop, ~/Documents, ~/.claude.json, etc.)
-3. Do NOT try to understand "the codebase" by exploring parent directories
-4. When asked to build something, create it as a new subdirectory in this workspace
-5. This is a FRESH workspace for user projects - treat it as empty unless you see existing project folders
+YOUR ROLE: When users describe what they need, you BUILD it. No questions about "web vs CLI" - you build ClaudeOS tools.
 
-If the workspace appears empty, that's expected. Just start building what the user asks for.`;
+WHAT ARE CLAUDEOS TOOLS?
+- HTML/CSS/JS apps that render in the ClaudeOS tool gallery
+- Each tool is a folder in: ${toolsPath}/
+- Contains: tool.json (metadata), index.html (UI), app.js (logic), data.json (storage)
+- Simple, local, no npm/webpack/frameworks
+
+HOW TO BUILD:
+1. Create folder in ${toolsPath}/<tool-name>/
+2. Write index.html with clean UI
+3. Add app.js for functionality
+4. Use data.json for local storage
+5. Create tool.json with name, description, entry point
+6. Tell user it's ready
+
+CRITICAL RULES:
+- Do NOT ask "what type of app" - always build ClaudeOS tools
+- Do NOT ask about storage format - use JSON files
+- Do NOT explore outside ClaudeOS directories
+- Do NOT read ~/Desktop, ~/.claude.json, or system files
+- Build first, iterate based on feedback
+
+DIRECTORIES YOU CAN USE:
+- ${workspacePath}/ - scratch/development
+- ${toolsPath}/ - where tools live
+
+When asked to build something, JUST BUILD IT. Make reasonable choices. User will tell you what to change.`;
 
     const response = query({
       prompt: enhancedPrompt,
