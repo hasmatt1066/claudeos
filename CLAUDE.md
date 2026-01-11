@@ -97,13 +97,13 @@ src/
 
 ## Current State
 
-**Phase:** 3 (Chat UI)
+**Phase:** 4 (IPC Infrastructure)
 
-Phases 1-2 complete: electron-vite scaffold with React 19, TypeScript strict mode, secure Electron window shell.
+Phases 1-3 complete: electron-vite scaffold, secure window shell, chat UI with placeholder responses.
 
 **Next Steps:**
-1. Implement chat UI component
-2. Set up IPC infrastructure
+1. Set up IPC infrastructure (main ↔ renderer)
+2. Set up MessagePort for streaming
 3. Integrate Claude Agent SDK in utility process
 4. Build first proof of concept: chat → tool → gallery
 

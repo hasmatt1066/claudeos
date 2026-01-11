@@ -4,38 +4,48 @@
   box-sizing: border-box;
 }
 
+html, body, #root {
+  height: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
     'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   background-color: #1a1a2e;
   color: #eaeaea;
-  min-height: 100vh;
 }
 
 #root {
-  min-height: 100vh;
   display: flex;
+  flex-direction: column;
 }
 
 .app {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  height: 100%;
+  overflow: hidden;
 }
 
-.app h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.app-header {
+  padding: 0.75rem 1rem;
+  background-color: #16162a;
+  border-bottom: 1px solid #2d2d44;
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.app p {
-  font-size: 1.2rem;
-  color: #888;
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
 }
