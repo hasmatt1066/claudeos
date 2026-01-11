@@ -1,5 +1,6 @@
 import React from 'react';
 import Chat from './components/Chat';
+import LearningWindow from './components/LearningWindow';
 
 function App(): React.JSX.Element {
   return (
@@ -9,6 +10,7 @@ function App(): React.JSX.Element {
       </header>
       <main className="app-main">
         <Chat />
+        <LearningWindow />
       </main>
     </div>
   );

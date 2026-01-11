@@ -20,7 +20,7 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 7 of 13.** Agent SDK integrated. Building learning window.
+**Phase 8 of 13.** Learning window complete. Building tool gallery UI.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window
@@ -28,8 +28,9 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 - Phase 4: IPC Infrastructure
 - Phase 5: Utility Process
 - Phase 6: Agent SDK Integration
-- Phase 7: Learning Window (current)
-- Phase 8-13: See [ROADMAP.md](./ROADMAP.md)
+- Phase 7: Learning Window
+- Phase 8: Tool Gallery UI (current)
+- Phase 9-13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 
