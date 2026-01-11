@@ -7,7 +7,7 @@
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import * as path from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { MessagePortMain } from 'electron';
 import { contextBrain } from './services/context-brain';
 
@@ -58,6 +58,52 @@ function initWorkspace(): void {
     console.log('[Agent Worker] Created workspace directory:', workspacePath);
   } else {
     console.log('[Agent Worker] Using workspace directory:', workspacePath);
+  }
+
+  // Create or update CLAUDE.md to guide the agent
+  const claudeMdPath = path.join(workspacePath, 'CLAUDE.md');
+  if (!existsSync(claudeMdPath)) {
+    const claudeMdContent = `# ClaudeOS Workspace
+
+This is your personal workspace managed by ClaudeOS.
+
+## Important Guidelines
+
+- **This is a sandboxed workspace.** All projects you create should be built here.
+- **Do NOT read or modify files outside this directory.** Your working directory is: \`${workspacePath}\`
+- **Do NOT explore parent directories** or other locations on the system.
+- **When asked to build something**, create it as a new subdirectory here (e.g., \`./task-tracker/\`, \`./my-app/\`).
+
+## Directory Structure
+
+Each project you create should be in its own subdirectory:
+
+\`\`\`
+workspace/
+├── CLAUDE.md (this file)
+├── project-1/
+├── project-2/
+└── ...
+\`\`\`
+
+## What You Can Do
+
+- Create new projects in subdirectories
+- Read and write files within this workspace
+- Run commands within this workspace
+- Build web apps, scripts, tools, and anything the user requests
+
+## What You Should NOT Do
+
+- Read files from \`~/Desktop/\`, \`~/Documents/\`, or other personal directories
+- Explore the ClaudeOS application source code
+- Access system configuration files
+- Read \`.claude.json\` or other Claude Code configuration files
+
+Focus on building what the user asks for, right here in this workspace.
+`;
+    writeFileSync(claudeMdPath, claudeMdContent, 'utf-8');
+    console.log('[Agent Worker] Created CLAUDE.md in workspace');
   }
 }
 
@@ -171,6 +217,20 @@ async function handleChat(payload: ChatPayload): Promise<void> {
       initWorkspace();
     }
 
+    // System prompt to constrain agent to workspace
+    const systemPrompt = `You are an assistant operating within ClaudeOS, a personal computing environment.
+
+CRITICAL: You are sandboxed to this workspace directory: ${workspacePath}
+
+Rules:
+1. ONLY read and write files within the workspace directory
+2. Do NOT explore or read files outside the workspace (no ~/Desktop, ~/Documents, ~/.claude.json, etc.)
+3. Do NOT try to understand "the codebase" by exploring parent directories
+4. When asked to build something, create it as a new subdirectory in this workspace
+5. This is a FRESH workspace for user projects - treat it as empty unless you see existing project folders
+
+If the workspace appears empty, that's expected. Just start building what the user asks for.`;
+
     const response = query({
       prompt: enhancedPrompt,
       options: {
@@ -178,6 +238,7 @@ async function handleChat(payload: ChatPayload): Promise<void> {
         allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep'],
         permissionMode: 'acceptEdits',
         cwd: workspacePath,
+        systemPrompt,
         resume: sessionId || undefined
       }
     });
