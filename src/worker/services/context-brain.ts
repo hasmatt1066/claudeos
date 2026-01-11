@@ -5,6 +5,7 @@
 
 import * as lancedb from '@lancedb/lancedb';
 import { embed, initEmbeddings } from './embeddings';
+import { escapeLanceDBString } from '../../shared/config';
 
 export interface Document {
   id: string;
@@ -187,7 +188,9 @@ export class ContextBrain {
       throw new Error('Context brain not initialized');
     }
 
-    await this.table.delete(`filePath = '${filePath}'`);
+    // Escape the file path to prevent injection attacks
+    const safeFilePath = escapeLanceDBString(filePath);
+    await this.table.delete(`filePath = '${safeFilePath}'`);
     console.log('[ContextBrain] Deleted documents for:', filePath);
   }
 

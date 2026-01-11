@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
+import { isValidToolId, CLAUDEOS_HOME_DIR, TOOLS_DIR } from '../../shared/config';
 
 export interface ToolManifest {
   id: string;
@@ -30,7 +31,16 @@ export class ToolManager extends EventEmitter {
     super();
     // Use user's home directory for ClaudeOS data
     const homeDir = app.getPath('home');
-    this.toolsDir = path.join(homeDir, 'ClaudeOS', 'tools');
+    this.toolsDir = path.join(homeDir, CLAUDEOS_HOME_DIR, TOOLS_DIR);
+  }
+
+  /**
+   * Validate tool ID to prevent path traversal attacks
+   */
+  private validateToolId(toolId: string): void {
+    if (!isValidToolId(toolId)) {
+      throw new Error(`Invalid tool ID: ${toolId}. Only alphanumeric characters, hyphens, and underscores are allowed.`);
+    }
   }
 
   setMainWindow(window: BrowserWindow): void {
@@ -92,6 +102,7 @@ export class ToolManager extends EventEmitter {
   }
 
   get(toolId: string): ToolWithStatus | null {
+    this.validateToolId(toolId);
     const tool = this.tools.get(toolId);
     if (!tool) return null;
     return {
@@ -101,6 +112,7 @@ export class ToolManager extends EventEmitter {
   }
 
   async launch(toolId: string): Promise<void> {
+    this.validateToolId(toolId);
     const tool = this.tools.get(toolId);
     if (!tool) {
       throw new Error(`Tool not found: ${toolId}`);
@@ -157,6 +169,7 @@ export class ToolManager extends EventEmitter {
   }
 
   async stop(toolId: string): Promise<void> {
+    this.validateToolId(toolId);
     const child = this.processes.get(toolId);
     if (!child) {
       console.log(`[ToolManager] Tool not running: ${toolId}`);
@@ -172,6 +185,7 @@ export class ToolManager extends EventEmitter {
   }
 
   async delete(toolId: string): Promise<void> {
+    this.validateToolId(toolId);
     // Stop if running
     await this.stop(toolId);
 
@@ -191,6 +205,7 @@ export class ToolManager extends EventEmitter {
   }
 
   async save(manifest: ToolManifest, files: Record<string, string>): Promise<void> {
+    this.validateToolId(manifest.id);
     const toolDir = path.join(this.toolsDir, manifest.id);
 
     // Create tool directory
@@ -213,6 +228,7 @@ export class ToolManager extends EventEmitter {
   }
 
   getStatus(toolId: string): 'running' | 'stopped' | 'error' {
+    this.validateToolId(toolId);
     return this.processes.has(toolId) ? 'running' : 'stopped';
   }
 

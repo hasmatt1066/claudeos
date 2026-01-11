@@ -8,6 +8,7 @@ import { trayManager } from './services/tray-manager';
 import { InboxProcessor, type ProcessedFile } from './services/inbox-processor';
 import { setMainWindow } from './ipc/chat';
 import { loadWindowState, trackWindowState } from './services/window-state';
+import { CLAUDEOS_HOME_DIR, INBOX_DIR, CONTEXT_DIR } from '../shared/config';
 
 let mainWindow: BrowserWindow | null = null;
 let inboxProcessor: InboxProcessor | null = null;
@@ -105,11 +106,11 @@ app.whenReady().then(async () => {
 
   // Initialize inbox processor after agent process is ready
   const homeDir = process.env.HOME || process.env.USERPROFILE || '';
-  const claudeOSHome = join(homeDir, 'ClaudeOS');
+  const claudeOSHome = join(homeDir, CLAUDEOS_HOME_DIR);
 
   inboxProcessor = new InboxProcessor({
-    inboxPath: join(claudeOSHome, 'inbox'),
-    contextPath: join(claudeOSHome, 'context'),
+    inboxPath: join(claudeOSHome, INBOX_DIR),
+    contextPath: join(claudeOSHome, CONTEXT_DIR),
     onFileProcessed: async (file: ProcessedFile) => {
       // Index in context brain via agent process
       if (file.text) {

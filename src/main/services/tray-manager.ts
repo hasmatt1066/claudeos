@@ -5,6 +5,7 @@
 
 import { Tray, Menu, app, nativeImage, BrowserWindow, MenuItemConstructorOptions } from 'electron';
 import path from 'path';
+import fs from 'fs';
 
 export class TrayManager {
   private tray: Tray | null = null;
@@ -54,7 +55,6 @@ export class TrayManager {
 
     for (const iconPath of possiblePaths) {
       try {
-        const fs = require('fs');
         if (fs.existsSync(iconPath)) {
           icon = nativeImage.createFromPath(iconPath);
           if (!icon.isEmpty()) {
@@ -63,7 +63,7 @@ export class TrayManager {
             break;
           }
         }
-      } catch (e) {
+      } catch {
         // Continue to next path
       }
     }
