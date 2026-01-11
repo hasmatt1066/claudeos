@@ -1,10 +1,12 @@
 /**
  * Window State Service
  * Persists and restores window size/position across sessions
+ * Uses simple JSON file instead of electron-store for ESM compatibility
  */
 
-import Store from 'electron-store';
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow, screen, app } from 'electron';
+import { join } from 'path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 
 interface WindowBounds {
   x: number;
@@ -18,9 +20,37 @@ interface WindowStateConfig {
   defaultHeight?: number;
 }
 
-const store = new Store<{ windowBounds: WindowBounds }>({
-  name: 'claudeos-window-state'
-});
+// Simple JSON-based storage for window state
+const getConfigPath = (): string => {
+  const userDataPath = app.getPath('userData');
+  return join(userDataPath, 'window-state.json');
+};
+
+const loadFromFile = (): WindowBounds | null => {
+  try {
+    const configPath = getConfigPath();
+    if (existsSync(configPath)) {
+      const data = readFileSync(configPath, 'utf-8');
+      return JSON.parse(data) as WindowBounds;
+    }
+  } catch (e) {
+    console.warn('[WindowState] Failed to load state:', e);
+  }
+  return null;
+};
+
+const saveToFile = (bounds: WindowBounds): void => {
+  try {
+    const configPath = getConfigPath();
+    const dir = join(configPath, '..');
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+    writeFileSync(configPath, JSON.stringify(bounds, null, 2));
+  } catch (e) {
+    console.warn('[WindowState] Failed to save state:', e);
+  }
+};
 
 const DEFAULT_WIDTH = 1200;
 const DEFAULT_HEIGHT = 800;
@@ -29,7 +59,7 @@ const DEFAULT_HEIGHT = 800;
  * Get saved window bounds or return defaults
  */
 export function loadWindowState(config: WindowStateConfig = {}): WindowBounds {
-  const saved = store.get('windowBounds');
+  const saved = loadFromFile();
 
   if (saved) {
     // Validate that the saved position is still on a visible display
@@ -73,7 +103,7 @@ export function saveWindowState(win: BrowserWindow): void {
   }
 
   const bounds = win.getBounds();
-  store.set('windowBounds', bounds);
+  saveToFile(bounds);
 }
 
 /**
