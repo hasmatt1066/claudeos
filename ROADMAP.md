@@ -6,7 +6,7 @@ This file tracks the phased build of ClaudeOS. Each phase is a discrete Ralph lo
 
 ## Current Phase
 
-**PHASE: 5**
+**PHASE: 6**
 
 Update this number after completing each phase.
 
@@ -20,7 +20,7 @@ Update this number after completing each phase.
 | 2 | Window Shell | complete | Basic Electron window with React |
 | 3 | Chat UI | complete | Chat interface component |
 | 4 | IPC Infrastructure | complete | Main↔Renderer communication |
-| 5 | Utility Process | pending | Agent worker process setup |
+| 5 | Utility Process | complete | Agent worker process setup |
 | 6 | Agent SDK Integration | pending | Connect chat to Claude |
 | 7 | Learning Window | pending | File operations display |
 | 8 | Tool Gallery UI | pending | Tool cards and management |
@@ -143,4 +143,5 @@ Update this number after completing each phase.
 - **Phase 2 (2026-01-11):** Window shell complete. Security settings verified, window title set.
 - **Phase 3 (2026-01-11):** Chat UI complete. Message list, input, placeholder responses, dark theme.
 - **Phase 4 (2026-01-11):** IPC infrastructure complete. Typed API, handlers, chat uses IPC.
+- **Phase 5 (2026-01-11):** Utility process complete. Agent worker with MessagePort, auto-restart.
 

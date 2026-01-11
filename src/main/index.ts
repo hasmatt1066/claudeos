@@ -2,9 +2,12 @@ import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc';
+import { agentProcess } from './services/agent-process';
+
+let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     title: 'ClaudeOS',
@@ -19,13 +22,16 @@ function createWindow(): void {
   });
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+    mainWindow?.show();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
   });
+
+  // Set the main window for agent process to send messages to
+  agentProcess.setMainWindow(mainWindow);
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -36,7 +42,7 @@ function createWindow(): void {
 }
 
 // This method will be called when Electron has finished initialization
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.claudeos');
 
@@ -51,6 +57,9 @@ app.whenReady().then(() => {
 
   createWindow();
 
+  // Start the agent process after window is created
+  await agentProcess.start();
+
   app.on('activate', function () {
     // On macOS, re-create a window when the dock icon is clicked
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -63,3 +72,11 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+// Clean shutdown
+app.on('before-quit', async () => {
+  await agentProcess.stop();
+});
+
+// Export for use in IPC handlers
+export { mainWindow, agentProcess };

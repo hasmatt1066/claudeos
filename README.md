@@ -20,14 +20,15 @@ This isn't a no-code tool. It's not an app builder. It's closer to: **what if Cl
 
 ## Status
 
-**Phase 5 of 13.** IPC infrastructure complete. Building utility process.
+**Phase 6 of 13.** Utility process complete. Integrating Agent SDK.
 
 - Phase 1: Scaffold electron-vite project
 - Phase 2: Basic Electron window
 - Phase 3: Chat UI
 - Phase 4: IPC Infrastructure
-- Phase 5: Utility Process (current)
-- Phase 6-13: See [ROADMAP.md](./ROADMAP.md)
+- Phase 5: Utility Process
+- Phase 6: Agent SDK Integration (current)
+- Phase 7-13: See [ROADMAP.md](./ROADMAP.md)
 
 ## Building ClaudeOS
 
