@@ -110,6 +110,27 @@
   }
 }
 
+/* Streaming cursor */
+.cursor-blink {
+  animation: blink 1s infinite;
+  color: #667eea;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.message-bubble.streaming {
+  border: 1px solid #667eea;
+  border-left: 3px solid #667eea;
+}
+
 /* Chat Input */
 .chat-input-container {
   display: flex;

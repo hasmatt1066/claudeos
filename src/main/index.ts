@@ -3,6 +3,7 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { setupIpcHandlers } from './ipc';
 import { agentProcess } from './services/agent-process';
+import { setMainWindow } from './ipc/chat';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -30,8 +31,9 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
-  // Set the main window for agent process to send messages to
+  // Set the main window for agent process and IPC handlers
   agentProcess.setMainWindow(mainWindow);
+  setMainWindow(mainWindow);
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { IElectronAPI, ChatResponse } from '../types/electron';
+import type { IElectronAPI, ChatResponse, StreamChunk } from '../types/electron';
 
 const api: IElectronAPI = {
   // App
@@ -7,12 +7,23 @@ const api: IElectronAPI = {
   getPlatform: (): Promise<NodeJS.Platform> => ipcRenderer.invoke('app:getPlatform'),
 
   // Chat
-  sendMessage: (message: string): Promise<ChatResponse> => ipcRenderer.invoke('chat:send', message),
+  sendMessage: (message: string, sessionId?: string): Promise<ChatResponse> =>
+    ipcRenderer.invoke('chat:send', message, sessionId),
+
   onMessage: (callback: (data: unknown) => void): (() => void) => {
     const handler = (_event: Electron.IpcRendererEvent, data: unknown): void => callback(data);
     ipcRenderer.on('chat:message', handler);
     return () => {
       ipcRenderer.removeListener('chat:message', handler);
+    };
+  },
+
+  onStreamChunk: (callback: (chunk: StreamChunk) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, chunk: StreamChunk): void =>
+      callback(chunk);
+    ipcRenderer.on('chat:stream', handler);
+    return () => {
+      ipcRenderer.removeListener('chat:stream', handler);
     };
   }
 };

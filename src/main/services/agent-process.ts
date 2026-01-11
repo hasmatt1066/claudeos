@@ -55,8 +55,8 @@ export class AgentProcessManager {
       const message = event.data as WorkerMessage;
       console.log('Received from worker:', message.type);
 
-      // Route chat responses to the IPC handler
-      if (message.type === 'chat:response') {
+      // Route all chat-related messages through handleWorkerResponse
+      if (message.type.startsWith('chat:')) {
         handleWorkerResponse(message as Parameters<typeof handleWorkerResponse>[0]);
       }
 
