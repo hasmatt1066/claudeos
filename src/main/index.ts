@@ -6,6 +6,7 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    title: 'ClaudeOS',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
